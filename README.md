@@ -71,27 +71,41 @@ Midnight network, Compact language, Midnight.js 4.1, DApp Connector API 4
 ## Prerequisites
 - **Node.js v22+**
 - **Lace wallet** browser extension (Midnight), switched to **Preprod**, with tDUST
-- **Docker Desktop** — runs the proof server used by deploy/admin scripts
-- **Compact toolchain** (`compact` devtools 0.5.x, compiler **0.31.1** — see the
-  [compatibility matrix](https://docs.midnight.network/relnotes/support-matrix))
-- **Windows only:** WSL2 — the Compact compiler ships for Linux and macOS only
+- **GitHub account** — GitHub Actions compiles the Compact contract on Ubuntu
+- **Docker Desktop** — only needed later for the proof server used by deploy/admin scripts
 
-## Setup
+## Setup And GitHub Actions Build
 ```bash
-# 1. Compact devtools (Linux / macOS / WSL2)
-curl --proto '=https' --tlsv1.2 -LsSf \
-  https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
-compact update 0.31.1
-
-# 2. JS dependencies
+# Install JavaScript dependencies for local frontend work
 npm install
-
-# 3. Compile the contract → managed/room-membership
-npm run compile          # Linux / macOS / WSL2
-npm run compile:wsl      # Windows PowerShell (runs the compiler inside WSL)
 ```
 
+You do **not** need Ubuntu, WSL2, or the Compact compiler installed locally.
+Every push and pull request runs `.github/workflows/ci.yml` on an Ubuntu GitHub
+Actions runner. The workflow:
+
+1. Installs Compact compiler `0.31.1`.
+2. Compiles `contracts/room-membership.compact`.
+3. Runs TypeScript typechecking and Vitest tests.
+4. Builds the React frontend.
+5. Uploads the generated `managed/` contract and frontend `dist/` as workflow artifacts.
+
+Run it manually from GitHub with **Actions → Build, Test, and Package → Run workflow**.
+Open the workflow run after it finishes to download the generated artifacts and
+inspect the test output.
+
+The Compact compiler is not available as a native Windows executable, so the
+local `npm run compile` command is intentionally reserved for Linux/macOS
+machines. The GitHub Actions workflow is the supported compilation path for
+this Windows development setup.
+
 ## Deploy the Contract (Preprod)
+
+Compilation and tests run in GitHub Actions. Deployment is a separate step and
+still requires a funded wallet plus a proof server. It is not performed by CI
+because wallet seeds, faucet funding, and deployment credentials must not be
+stored in GitHub Actions.
+
 ```bash
 npm run proof-server                      # terminal 1 (Docker)
 npm run deploy -- --network preprod       # terminal 2
@@ -120,8 +134,10 @@ vercel env add VITE_NETWORK_ID production        # preprod
 vercel env add VITE_CONTRACT_ADDRESS production  # from deployments/preprod.json
 vercel --prod
 ```
-`managed/room-membership` is committed so Vercel can build without the Compact
-compiler.
+The Vercel build needs the generated `managed/` output. Download the
+`dexting-managed-room-membership-<commit>` artifact from a successful GitHub
+Actions run and place it under `managed/room-membership/` before deploying the
+frontend, or add an artifact-publishing step to your deployment process.
 
 ## Run Tests
 ```bash

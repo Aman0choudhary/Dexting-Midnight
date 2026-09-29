@@ -1,4 +1,4 @@
-name: CI
+name: Build, Test, and Package
 
 permissions: {}
 
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  compile-and-test:
+  compile-test-and-package:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +28,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Compile contract
+      - name: Compile Compact contract on GitHub Actions
         run: npm run compile
 
       - name: Typecheck
@@ -42,9 +42,18 @@ jobs:
         env:
           VITE_NETWORK_ID: preprod
 
-      - name: Upload compiled contract
+      - name: Upload generated contract and ZK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: managed-room-membership
-          path: managed/room-membership
+          name: dexting-managed-room-membership-${{ github.sha }}
+          path: managed/room-membership/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dexting-frontend-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
           retention-days: 7

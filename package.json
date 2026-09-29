@@ -13,7 +13,6 @@
     "serve": "vite preview",
     "compile": "compact compile contracts/room-membership.compact managed/room-membership",
     "compile:fast": "compact compile --skip-zk contracts/room-membership.compact managed/room-membership",
-    "compile:wsl": "wsl bash -lc \"compact compile contracts/room-membership.compact managed/room-membership\"",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "proof-server": "docker run --rm -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v",
