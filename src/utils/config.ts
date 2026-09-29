@@ -10,11 +10,11 @@ export const ZK_ASSETS_PATH = '/zk/room-membership';
 /** Fallback indexer if the wallet does not report one. */
 export const FALLBACK_INDEXER: Record<string, { http: string; ws: string }> = {
   preprod: {
-    http: 'https://indexer.preprod.midnight.network/api/v4/graphql',
-    ws: 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws',
+    http: 'https://indexer.preprod.midnight.network/api/v3/graphql',
+    ws: 'wss://indexer.preprod.midnight.network/api/v3/graphql/ws',
   },
   preview: {
-    http: 'https://indexer.preview.midnight.network/api/v4/graphql',
-    ws: 'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
+    http: 'https://indexer.preview.midnight.network/api/v3/graphql',
+    ws: 'wss://indexer.preview.midnight.network/api/v3/graphql/ws',
   },
 };

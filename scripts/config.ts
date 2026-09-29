@@ -22,8 +22,8 @@ const NETWORKS: Record<NetworkName, NetworkConfig> = {
   preview: {
     name: 'preview',
     networkId: 'preview',
-    indexer: 'https://indexer.preview.midnight.network/api/v4/graphql',
-    indexerWS: 'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
+    indexer: 'https://indexer.preview.midnight.network/api/v3/graphql',
+    indexerWS: 'wss://indexer.preview.midnight.network/api/v3/graphql/ws',
     node: 'https://rpc.preview.midnight.network',
     proofServer: PROOF_SERVER,
     faucet: 'https://midnight-tmnight-preview.nethermind.dev/',
@@ -32,8 +32,8 @@ const NETWORKS: Record<NetworkName, NetworkConfig> = {
   preprod: {
     name: 'preprod',
     networkId: 'preprod',
-    indexer: 'https://indexer.preprod.midnight.network/api/v4/graphql',
-    indexerWS: 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws',
+    indexer: 'https://indexer.preprod.midnight.network/api/v3/graphql',
+    indexerWS: 'wss://indexer.preprod.midnight.network/api/v3/graphql/ws',
     node: 'https://rpc.preprod.midnight.network',
     proofServer: PROOF_SERVER,
     faucet: 'https://midnight-tmnight-preprod.nethermind.dev/',

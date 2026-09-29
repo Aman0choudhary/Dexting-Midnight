@@ -73,8 +73,19 @@ export const buildWallet = async (config: NetworkConfig, seedHex: string): Promi
 
 export const unshieldedAddress = (ctx: WalletContext): string => ctx.unshieldedKeystore.getBech32Address().toString();
 
-export const waitForSync = (wallet: WalletFacade) =>
-  Rx.firstValueFrom(wallet.state().pipe(Rx.throttleTime(5_000), Rx.filter((s) => s.isSynced)));
+export const waitForSync = (wallet: WalletFacade, timeoutMs = 10 * 60 * 1000) =>
+  Rx.firstValueFrom(
+    wallet.state().pipe(
+      Rx.throttleTime(5_000),
+      Rx.filter((s) => s.isSynced),
+      Rx.timeout({ each: timeoutMs }),
+    ),
+  ).catch(() => {
+    throw new Error(
+      `Wallet did not synchronize within ${Math.round(timeoutMs / 60_000)} minutes. ` +
+        'Check the Preprod indexer/RPC endpoints, wallet funding, and network status.',
+    );
+  });
 
 export const nightBalance = async (wallet: WalletFacade): Promise<bigint> => {
   const s = await waitForSync(wallet);
