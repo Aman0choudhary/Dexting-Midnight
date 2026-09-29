@@ -1,14 +1,16 @@
 # Verified Anonymous Rooms
 > Prove you belong in a group — without ever revealing who you are.
 
+[![Build, Test, and Package](https://github.com/Aman0choudhary/Dexting-Midnight/actions/workflows/ci.yml/badge.svg)](https://github.com/Aman0choudhary/Dexting-Midnight/actions/workflows/ci.yml)
+
 ## Live Demo
 [PASTE LIVE URL AFTER DEPLOYING FRONTEND]
 
 ## Contract Address
 | Network | Address |
 |----------|----------------------------------|
-| Preprod | [PASTE ADDRESS AFTER DEPLOY — `deployments/preprod.json`] |
-| Preview | [OPTIONAL] |
+| Preprod | Pending funded deployment |
+| Preview | Pending funded deployment |
 
 ## What This Does
 Every room (a college batch, a club, a community) has a committed list of
@@ -98,6 +100,20 @@ The Compact compiler is not available as a native Windows executable, so the
 local `npm run compile` command is intentionally reserved for Linux/macOS
 machines. The GitHub Actions workflow is the supported compilation path for
 this Windows development setup.
+
+### Level 1 Verification
+
+- [x] Compact contract compiled by GitHub Actions
+- [x] Generated `managed/` contract and ZK artifacts uploaded as a workflow artifact
+- [x] TypeScript typecheck passed
+- [x] 5 membership/privacy tests passed
+- [x] Frontend production build passed
+- [ ] Deploy to Preview or Preprod and record the address below
+
+The latest successful build artifacts are attached to the successful workflow
+run. A funded wallet and a proof server are still required for the final live
+deployment; no deployment address is claimed until that transaction is
+confirmed on-chain.
 
 ## Deploy the Contract (Preprod)
 
