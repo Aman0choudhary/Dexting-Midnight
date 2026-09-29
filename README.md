@@ -115,6 +115,8 @@ run. A funded wallet and a proof server are still required for the final live
 deployment; no deployment address is claimed until that transaction is
 confirmed on-chain.
 
+Detailed evidence is recorded in [`docs/LEVEL1-SUBMISSION.md`](docs/LEVEL1-SUBMISSION.md).
+
 ## Deploy the Contract (Preprod)
 
 Compilation and tests run in GitHub Actions. Deployment is a separate step and
