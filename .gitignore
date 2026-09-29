@@ -1,0 +1,25 @@
+# Private planning docs (kept local only)
+plan.md
+prompts.md
+
+# Dependencies / build
+node_modules/
+dist/
+reports/
+coverage/
+
+# ZK assets copied from managed/ at build time
+public/zk/
+
+# Local env / secrets (wallet seeds, admin + member credentials)
+.secrets/
+.env
+.env.*
+!.env.example
+midnight-level-db/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

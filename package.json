@@ -1,0 +1,69 @@
+{
+  "name": "verified-anonymous-rooms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prove you belong in a group — without ever revealing who you are. Built on Midnight.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/sync-zk-assets.mjs && vite",
+    "build": "node scripts/sync-zk-assets.mjs && tsc --noEmit && vite build",
+    "serve": "vite preview",
+    "compile": "compact compile contracts/room-membership.compact managed/room-membership",
+    "compile:fast": "compact compile --skip-zk contracts/room-membership.compact managed/room-membership",
+    "compile:wsl": "wsl bash -lc \"compact compile contracts/room-membership.compact managed/room-membership\"",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "proof-server": "docker run --rm -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v",
+    "deploy": "tsx scripts/deploy.ts",
+    "enroll": "tsx scripts/enroll.ts",
+    "demo:join": "tsx scripts/demo-join.ts"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-js": "2.5.1",
+    "@midnight-ntwrk/compact-runtime": "0.16.0",
+    "@midnight-ntwrk/dapp-connector-api": "4.0.1",
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
+    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-network-id": "4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "4.1.1",
+    "@midnight-ntwrk/midnight-js-utils": "4.1.1",
+    "@midnight-ntwrk/wallet-sdk-abstractions": "2.1.0",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.1.2",
+    "@midnight-ntwrk/wallet-sdk-dust-wallet": "4.1.0",
+    "@midnight-ntwrk/wallet-sdk-facade": "4.0.1",
+    "@midnight-ntwrk/wallet-sdk-hd": "3.0.2",
+    "@midnight-ntwrk/wallet-sdk-shielded": "3.0.1",
+    "@midnight-ntwrk/wallet-sdk-unshielded-wallet": "3.1.0",
+    "buffer": "6.0.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "rxjs": "7.8.2",
+    "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "@types/ws": "8.18.1",
+    "@vitejs/plugin-react": "4.7.0",
+    "tsx": "4.20.6",
+    "typescript": "^5.7.0",
+    "vite": "6.3.6",
+    "vite-plugin-top-level-await": "1.6.0",
+    "vite-plugin-wasm": "3.5.0",
+    "vitest": "^3.2.0"
+  },
+  "overrides": {
+    "@midnight-ntwrk/onchain-runtime-v3": "3.0.0",
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/compact-runtime": "0.16.0"
+  }
+}

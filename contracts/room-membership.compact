@@ -1,0 +1,118 @@
+// =============================================================================
+// Verified Anonymous Rooms — room-membership.compact
+// =============================================================================
+//
+// A room has a committed set of eligible members. A member proves they are IN
+// that set without revealing WHICH entry is theirs.
+//
+// ----------------------------------------------------------------------------
+// PUBLIC (export ledger — plaintext on-chain, readable by anyone)
+// ----------------------------------------------------------------------------
+//   roomId         Identifier of this room (set once at deploy).
+//   admin          Hash-derived public key of the room admin (who may enroll).
+//   members        Merkle tree of member COMMITMENTS. Each leaf is
+//                  H("dexting:member:v1" || roomId || memberSecret). The leaf
+//                  reveals nothing about the member's secret or identity.
+//   memberCount    Number of enrolled commitments.
+//   nullifiers     One nullifier per successful join:
+//                  H("dexting:nullifier:v1" || roomId || memberSecret).
+//                  Uses a DIFFERENT domain separator than the commitment, so a
+//                  nullifier cannot be linked back to any Merkle leaf.
+//   verifiedJoins  Number of successful anonymous joins.
+//
+// ----------------------------------------------------------------------------
+// PRIVATE (witnesses — never leave the member's device)
+// ----------------------------------------------------------------------------
+//   memberSecret   The member's 32-byte membership credential.
+//   findMemberPath The Merkle path from the member's leaf to the root. It is
+//                  consumed inside the proof only; the path (and so the leaf
+//                  position) is never disclosed.
+//   adminSecret    The admin's secret key (only used by the admin).
+//
+// ----------------------------------------------------------------------------
+// WHAT joinRoom() PROVES — and the only thing it reveals
+// ----------------------------------------------------------------------------
+//   "The caller knows a secret whose commitment is one of the leaves of this
+//    room's member tree, and has not joined before."
+//
+//   The deliberate disclosure is the membership check itself: a Merkle root
+//   that is public anyway, plus an unlinkable nullifier that stops the same
+//   credential from joining twice. No identity, no credential, no leaf index.
+// =============================================================================
+
+pragma language_version >= 0.20;
+
+import CompactStandardLibrary;
+
+// ---- Public ledger state ---------------------------------------------------
+
+export sealed ledger roomId: Bytes<32>;
+export sealed ledger admin: Bytes<32>;
+export ledger members: HistoricMerkleTree<10, Bytes<32>>;
+export ledger memberCount: Counter;
+export ledger nullifiers: Set<Bytes<32>>;
+export ledger verifiedJoins: Counter;
+
+// ---- Private witnesses (implemented in contracts/witnesses.ts) --------------
+
+witness memberSecret(): Bytes<32>;
+witness findMemberPath(commitment: Bytes<32>): MerkleTreePath<10, Bytes<32>>;
+witness adminSecret(): Bytes<32>;
+
+// ---- Constructor -----------------------------------------------------------
+
+constructor(rid: Bytes<32>) {
+  roomId = disclose(rid);
+  admin = disclose(adminKey(adminSecret()));
+}
+
+// ---- Circuits --------------------------------------------------------------
+
+// Admin adds a member commitment to the room. The commitment is produced
+// off-chain by the member (see contracts/witnesses.ts) and is a hash, so
+// enrolling it reveals nothing about the member's secret.
+export circuit enrollMember(commitment: Bytes<32>): [] {
+  assert(admin == adminKey(adminSecret()), "Only the room admin can enroll members");
+  assert(!members.isFull(), "Room is full");
+  members.insert(disclose(commitment));
+  memberCount.increment(1);
+}
+
+// Anonymous room entry. Proves membership without revealing which member.
+export circuit joinRoom(): [] {
+  const sk = memberSecret();
+  const leaf = memberCommitment(roomId, sk);
+  const path = findMemberPath(leaf);
+
+  // The path must be for OUR leaf — otherwise anyone could replay another
+  // member's (public) leaf path.
+  assert(path.leaf == leaf, "Merkle path does not match credential");
+
+  // THE deliberate disclosure: "this caller is a verified member of this room".
+  // Only the (already public) Merkle root is revealed — not the leaf or path.
+  assert(
+    members.checkRoot(disclose(merkleTreePathRoot<10, Bytes<32>>(path))),
+    "Not a verified member of this room"
+  );
+
+  // Replay protection: one join per credential. The nullifier is unlinkable
+  // to the member's leaf because it uses a different domain separator.
+  const nul = disclose(joinNullifier(roomId, sk));
+  assert(!nullifiers.member(nul), "Credential has already been used to join");
+  nullifiers.insert(nul);
+  verifiedJoins.increment(1);
+}
+
+// ---- Pure helpers (also exported to TypeScript as pureCircuits) ------------
+
+export pure circuit memberCommitment(rid: Bytes<32>, sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "dexting:member:v1"), rid, sk]);
+}
+
+export pure circuit joinNullifier(rid: Bytes<32>, sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "dexting:nullifier:v1"), rid, sk]);
+}
+
+export pure circuit adminKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "dexting:admin:v1"), sk]);
+}
