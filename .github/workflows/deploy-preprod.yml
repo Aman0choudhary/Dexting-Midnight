@@ -49,6 +49,9 @@ jobs:
         env:
           WALLET_SEED: ${{ secrets.PREPROD_WALLET_SEED }}
           PROOF_SERVER_URL: http://127.0.0.1:6300
+          # Midnight wallet synchronization can exceed Node's default ~4 GB
+          # heap limit on hosted runners.
+          NODE_OPTIONS: --max-old-space-size=12288
         run: npm run deploy -- --network preprod
 
       - name: Show deployment address in job summary

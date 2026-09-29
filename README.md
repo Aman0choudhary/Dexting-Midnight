@@ -150,6 +150,9 @@ Run the deployment:
 5. Open the run summary to see the contract address, or download the
    `dexting-preprod-deployment-*` artifact containing `preprod.json`.
 
+The deployment job sets Node's heap limit to 12 GB because Midnight wallet
+synchronization can exceed Node's default heap limit on a GitHub-hosted runner.
+
 The GitHub runner compiles the contract, starts the proof server, waits for
 the funded wallet, registers DUST, deploys the contract, and stores the public
 deployment record. Docker is available on the GitHub-hosted runner; you do not
