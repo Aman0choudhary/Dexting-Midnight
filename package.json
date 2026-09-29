@@ -15,6 +15,7 @@
     "compile:fast": "compact compile --skip-zk contracts/room-membership.compact managed/room-membership",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "wallet:address": "tsx scripts/wallet-address.ts",
     "proof-server": "docker run --rm -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v",
     "deploy": "tsx scripts/deploy.ts",
     "enroll": "tsx scripts/enroll.ts",

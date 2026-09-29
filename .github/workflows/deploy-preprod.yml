@@ -1,0 +1,65 @@
+name: Deploy Preprod
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Compile and deploy to Preprod
+    runs-on: ubuntu-latest
+    environment: preprod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Compact compiler
+        uses: midnightntwrk/setup-compact-action@836895c8fffbbea6bd986af2b17e8941ff29d1f8 # v1
+        with:
+          compact-version: '0.31.1'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile contract
+        run: npm run compile
+
+      - name: Start Midnight proof server
+        run: |
+          docker run --detach --name midnight-proof-server \
+            --publish 6300:6300 \
+            midnightntwrk/proof-server:8.1.0 \
+            midnight-proof-server -v
+          for attempt in {1..30}; do
+            if docker ps --filter name=midnight-proof-server --filter status=running --quiet | grep -q .; then
+              echo "Proof server container is running"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs midnight-proof-server
+          exit 1
+
+      - name: Deploy contract to Preprod
+        env:
+          WALLET_SEED: ${{ secrets.PREPROD_WALLET_SEED }}
+          PROOF_SERVER_URL: http://127.0.0.1:6300
+        run: npm run deploy -- --network preprod
+
+      - name: Show deployment address in job summary
+        run: |
+          echo '## Preprod Deployment' >> "$GITHUB_STEP_SUMMARY"
+          cat deployments/preprod.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload deployment record
+        uses: actions/upload-artifact@v4
+        with:
+          name: dexting-preprod-deployment-${{ github.run_number }}
+          path: deployments/preprod.json
+          if-no-files-found: error
+          retention-days: 90

@@ -120,17 +120,40 @@ Detailed evidence is recorded in [`docs/LEVEL1-SUBMISSION.md`](docs/LEVEL1-SUBMI
 ## Deploy the Contract (Preprod)
 
 Compilation and tests run in GitHub Actions. Deployment is a separate step and
-still requires a funded wallet plus a proof server. It is not performed by CI
-because wallet seeds, faucet funding, and deployment credentials must not be
-stored in GitHub Actions.
+also runs in GitHub Actions. The deployment workflow uses a GitHub Actions
+secret for the wallet seed; the seed is never committed or printed in logs.
 
 ```bash
-npm run proof-server                      # terminal 1 (Docker)
-npm run deploy -- --network preprod       # terminal 2
+# Install dependencies locally, then generate a wallet address.
+npm install
+npm run wallet:address -- --network preprod
 ```
-The script prints a deployer wallet address and waits. Fund it at the
-[Preprod faucet](https://midnight-tmnight-preprod.nethermind.dev/); it then
-registers DUST, deploys, and writes the address to `deployments/preprod.json`.
+
+The command writes a new seed to `.secrets/preprod-wallet.json` and prints the
+derived **funding address**. It does not print the seed. Fund that address at
+the [Preprod faucet](https://midnight-tmnight-preprod.nethermind.dev/).
+
+Then add the seed as a repository secret:
+
+1. Open GitHub → `Aman0choudhary/Dexting-Midnight` → **Settings**.
+2. Open **Secrets and variables → Actions → New repository secret**.
+3. Set the name to `PREPROD_WALLET_SEED`.
+4. Open `.secrets/preprod-wallet.json` locally and paste only its `seed` value.
+5. Click **Add secret**. Never paste the seed into an issue, README, commit, or chat.
+
+Run the deployment:
+
+1. Open the repository's **Actions** tab.
+2. Select **Deploy Preprod**.
+3. Click **Run workflow** on branch `main`.
+4. Wait for the workflow to finish successfully.
+5. Open the run summary to see the contract address, or download the
+   `dexting-preprod-deployment-*` artifact containing `preprod.json`.
+
+The GitHub runner compiles the contract, starts the proof server, waits for
+the funded wallet, registers DUST, deploys the contract, and stores the public
+deployment record. Docker is available on the GitHub-hosted runner; you do not
+need Docker or Ubuntu installed locally for this workflow.
 
 Admin helpers:
 ```bash
